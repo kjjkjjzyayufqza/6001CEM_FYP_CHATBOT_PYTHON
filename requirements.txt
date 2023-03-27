@@ -3,4 +3,4 @@ nltk==3.6.7
 numpy==1.21.2
 psutil==5.9.4
 pydantic==1.8.2
-torch==1.13.0+cu117
+torch==1.13.0+cpu

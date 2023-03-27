@@ -3,9 +3,7 @@ from fastapi.responses import RedirectResponse
 from fastapi import FastAPI
 
 from pydantic import BaseModel
-import sys
-sys.path.append(r'.\Chat')
-import Chat.chat
+
 
 app = FastAPI()
 
@@ -20,7 +18,7 @@ async def docs_redirect():
 
 @app.post("/Chat")
 def read_item(Message: str):
-    return Chat.chat.ChatBot(Message)
+    return "hi"
 
 @app.get("/items/{item_id}")
 def read_item(item_id: int, q: Union[str, None] = None):

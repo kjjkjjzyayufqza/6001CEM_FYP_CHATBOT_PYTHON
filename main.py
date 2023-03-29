@@ -1,12 +1,13 @@
+from fastapi.middleware.cors import CORSMiddleware
 import CPUinfo.CPUinfo
-import Chat.chat
-from typing import Union
-from fastapi.responses import RedirectResponse
-from fastapi import FastAPI
+from Chat.chat import *
+from ImageRecognition.Prediction_Pictures import *
+from typing import Union, Annotated
+from fastapi.responses import RedirectResponse, FileResponse, Response
+from fastapi import FastAPI, File, UploadFile
 from pydantic import BaseModel
 import sys
 sys.path.append(r'.\Chat')
-from fastapi.middleware.cors import CORSMiddleware
 
 
 app = FastAPI()
@@ -18,9 +19,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-def FirstStartFunc():
-    CPUinfo.CPUinfo.GetCPUinfo()
 
 
 class Item(BaseModel):
@@ -55,7 +53,7 @@ async def docs_redirect():
 
 @app.post("/Chat")
 def read_item(Message: MessageBody):
-    response = Chat.chat.ChatBot(Message.MessageStr)
+    response = ChatBot(Message.MessageStr)
     return {"botMessage": response}
 
 
@@ -80,4 +78,13 @@ async def update_item(item_id: int, item: Item):
     return results
 
 
-FirstStartFunc()
+@app.post("/files")
+async def create_file(image: Annotated[bytes, File()]):
+    image_bytes: bytes = image
+    responseText = PredictionPictures(image_bytes)
+    return {"botMessage": responseText}
+
+
+@app.get("/SystemInfo")
+async def get_SystemInfo():
+    return CPUinfo.CPUinfo.GetCPUinfo()

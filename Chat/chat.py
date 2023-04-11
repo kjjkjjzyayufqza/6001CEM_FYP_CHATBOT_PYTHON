@@ -55,7 +55,7 @@ def ChatBot(Message):
         intents = json.load(f)
 
     FILE = "model.pth"
-    data = torch.load(current_path + FILE)
+    data = torch.load(current_path + FILE,map_location ='cpu')
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     input_size = data["input_size"]
@@ -96,4 +96,4 @@ def ChatBot(Message):
 
 
 if __name__ == '__main__':
-    ChatBot()
+    print(ChatBot("hi"))

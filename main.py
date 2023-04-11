@@ -1,5 +1,5 @@
 from fastapi.middleware.cors import CORSMiddleware
-import CPUinfo.CPUinfo
+from CPUinfo.CPUinfo import *
 from Chat.chat import *
 from ImageRecognition.Prediction_Pictures import *
 from typing import Union, Annotated
@@ -87,4 +87,4 @@ async def create_file(image: Annotated[bytes, File()]):
 
 @app.get("/SystemInfo")
 async def get_SystemInfo():
-    return CPUinfo.CPUinfo.GetCPUinfo()
+    return GetCPUinfo()

@@ -5,8 +5,8 @@ def GetCPUinfo():
     output = {
         "CPU COUNT": psutil.cpu_count(),
         "logical CPU COUNT": psutil.cpu_count(logical=False),
-        "CPU PERCENT": (psutil.cpu_percent(interval=1, percpu=False), "%"),
-        "RAM": (psutil.virtual_memory().percent, "%")
+        "CPU PERCENT": str(psutil.cpu_percent(interval=1, percpu=False)) + "%",
+        "RAM": str(psutil.virtual_memory().percent) + "%"
     }
     return output
 

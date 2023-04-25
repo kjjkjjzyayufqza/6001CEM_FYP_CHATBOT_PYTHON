@@ -2,6 +2,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from CPUinfo.CPUinfo import *
 from Chat.chat import *
 from ImageRecognition.Prediction_Pictures import *
+from isHumanClassifier.isHumanClassifier import *
 from typing import Union, Annotated
 from fastapi.responses import RedirectResponse, FileResponse, Response
 from fastapi import FastAPI, File, UploadFile
@@ -54,35 +55,47 @@ async def docs_redirect():
 @app.post("/Chat")
 def read_item(Message: MessageBody):
     response = ChatBot(Message.MessageStr)
-    return {"botMessage": response}
+    return {"result": True, "botMessage": response}
 
 
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: Union[str, None] = None):
-    return {"item_id": item_id, "q": q}
+# @app.get("/items/{item_id}")
+# def read_item(item_id: int, q: Union[str, None] = None):
+#     return {"item_id": item_id, "q": q}
 
 
-@app.put("/items/{item_id}",
-         responses={
-             200: {
-                 "description": "Item requested by ID",
-                 "content": {
-                     "application/json": {
-                         "example": {"id": "bar", "value": "The bar tenders"}
-                     }
-                 },
-             },
-         },)
-async def update_item(item_id: int, item: Item):
-    results = {"item_id": item_id, "item": item}
-    return results
+# @app.put("/items/{item_id}",
+#          responses={
+#              200: {
+#                  "description": "Item requested by ID",
+#                  "content": {
+#                      "application/json": {
+#                          "example": {"id": "bar", "value": "The bar tenders"}
+#                      }
+#                  },
+#              },
+#          },)
+# async def update_item(item_id: int, item: Item):
+#     results = {"item_id": item_id, "item": item}
+#     return results
 
 
 @app.post("/files")
 async def create_file(image: Annotated[bytes, File()]):
     image_bytes: bytes = image
-    responseText = PredictionPictures(image_bytes)
-    return {"botMessage": responseText}
+    isHuman = PredictionisHumanPictures(image_bytes)
+    if(isHuman["isHuman"] == True):
+        responseText = PredictionPictures(image_bytes)
+    else:
+        responseText = []
+    return {"result": isHuman["isHuman"],
+            "message": isHuman["message"],
+            "top5Prediction": responseText}
+
+
+@app.get("/getAllChatClass")
+def getAllChatClassByChatBot():
+    response = getAllChatClass()
+    return {"result": True,  "AllChatClass": response}
 
 
 @app.get("/SystemInfo")

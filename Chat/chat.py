@@ -54,8 +54,13 @@ def ChatBot(Message):
     with open(current_path + 'intents.json', 'r') as f:
         intents = json.load(f)
 
+    with open(current_path + 'suggestion.json', 'r') as suggestion:
+        suggestionData = json.load(suggestion)
+
+    ignore_tag = ['greeting', 'goodbye', 'thanks',
+                  'noanswer', 'options', 'Identity']
     FILE = "model.pth"
-    data = torch.load(current_path + FILE,map_location ='cpu')
+    data = torch.load(current_path + FILE, map_location='cpu')
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     input_size = data["input_size"]
@@ -81,18 +86,47 @@ def ChatBot(Message):
     probs = torch.softmax(output, dim=1)
     prob = probs[0][predicted.item()]
 
-    
+    print(prob)
+    botMessage = {'message': '', 'tag': '', 'description': '',
+                  'suggestionsText': '', 'suggestions': []}
     if prob.item() > 0.80:
         for intent in intents['intents']:
             if tag == intent["tag"]:
-                return(f"{random.choice(intent['responses'])}")
+                botMessage['tag'] = tag
+                if(tag not in ignore_tag):
+                    botMessage['description'] = suggestionData[tag]['Description']
+                    botMessage['suggestionsText'] = suggestionData[tag]['SuggestionsText']
+                    botMessage['suggestions'] = suggestionData[tag]['Suggestions']
+                botMessage['message'] = random.choice(intent['responses'])
+                return botMessage
+
     elif prob.item() > 0.65:
-        for intent in intents['intents']:
-            if tag == intent["tag"]:
-                return(
-                    f"I don't quite understand what you're describing, but it could be {random.choice(intent['responses'])}")
+        if(tag not in ignore_tag):
+            for intent in intents['intents']:
+                if tag == intent["tag"]:
+                    botMessage['tag'] = tag
+                    botMessage[
+                        'message'] = f"I don't quite understand what you're describing, but it could be {random.choice(intent['responses'])}"
+                    return botMessage
+        else:
+            botMessage[
+                'message'] = f"I do not understand..."
+            return botMessage
     else:
-        return (f"I do not understand...")
+        botMessage[
+            'message'] = f"I do not understand..."
+        return botMessage
+
+
+def getAllChatClass():
+    current_path = os.path.dirname(__file__) + '/'
+    with open(current_path + 'suggestion.json', 'r') as f:
+        allKey = []
+        intents = json.load(f)
+        for i in intents:
+            allKey.append(i)
+        print(allKey)
+    return allKey
 
 
 if __name__ == '__main__':

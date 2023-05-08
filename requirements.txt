@@ -9,3 +9,10 @@ pydantic==1.8.2
 --find-links https://download.pytorch.org/whl/torch_stable.html
 torch==1.13.0+cpu
 torchvision==0.14.0
+fastapi_mail==1.2.8
+jose==1.0.0
+motor==3.1.2
+passlib==1.7.4
+pymongo==4.3.3
+python-dotenv==1.0.0
+python_jose==3.3.0

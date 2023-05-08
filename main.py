@@ -3,6 +3,7 @@ from CPUinfo.CPUinfo import *
 from Chat.chat import *
 from ImageRecognition.Prediction_Pictures import *
 from isHumanClassifier.isHumanClassifier import *
+from UserAction.main import *
 from typing import Union, Annotated
 from fastapi.responses import RedirectResponse, FileResponse, Response
 from fastapi import FastAPI, File, UploadFile
@@ -55,28 +56,7 @@ async def docs_redirect():
 @app.post("/Chat")
 def read_item(Message: MessageBody):
     response = ChatBot(Message.MessageStr)
-    return {"result": True, "botMessage": response}
-
-
-# @app.get("/items/{item_id}")
-# def read_item(item_id: int, q: Union[str, None] = None):
-#     return {"item_id": item_id, "q": q}
-
-
-# @app.put("/items/{item_id}",
-#          responses={
-#              200: {
-#                  "description": "Item requested by ID",
-#                  "content": {
-#                      "application/json": {
-#                          "example": {"id": "bar", "value": "The bar tenders"}
-#                      }
-#                  },
-#              },
-#          },)
-# async def update_item(item_id: int, item: Item):
-#     results = {"item_id": item_id, "item": item}
-#     return results
+    return JSONResponse(status_code=200, content={"result": True, "botMessage": response})
 
 
 @app.post("/files")
@@ -87,17 +67,94 @@ async def create_file(image: Annotated[bytes, File()]):
         responseText = PredictionPictures(image_bytes)
     else:
         responseText = []
-    return {"result": isHuman["isHuman"],
-            "message": isHuman["message"],
-            "top5Prediction": responseText}
+
+    return JSONResponse(status_code=200, content={"result": isHuman["isHuman"],
+                                                  "message": isHuman["message"],
+                                                  "top5Prediction": responseText})
+
+
+@app.post("/Token", response_model=Token)
+async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
+    user = await authenticate_user(form_data.username, form_data.password)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"id": user['_id'], "name": user['name']}, expires_delta=access_token_expires
+    )
+    return {"access_token": access_token, "token_type": "bearer"}
+
+
+@app.get("/User", response_model=UserModel)
+async def read_users_me(current_user: UserModel = Depends(get_current_active_user)):
+    return current_user
+
+
+@app.post("/Register", response_description="Create User", response_model=CreateUserModel)
+async def create_user(user: CreateUserModel = Body(...)):
+    user = jsonable_encoder(user)
+    # Find if user email exists
+    old_email = await db["user"].find_one({"email": user['email']})
+    if(old_email is None):
+        new_user = await db["user"].insert_one(user)
+        created_user = await db["user"].find_one({"_id": new_user.inserted_id})
+        return JSONResponse(status_code=status.HTTP_201_CREATED, content=created_user)
+    else:
+        raise HTTPException(
+            status_code=404, detail=f"User email already exists")
+
+
+@app.put("/UpdateUser", response_description="Update a User", response_model=UserModel)
+async def update_user(current_user: UserModel = Depends(get_current_user), data: UpdateUserModel = Body(...)):
+    id = current_user['_id']
+    data = {k: v for k, v in data.dict().items() if v is not None}
+
+    if len(data) >= 1:
+        update_result = await db["user"].update_one({"_id": id}, {"$set": data})
+
+        if update_result.modified_count == 1:
+            if (
+                update_user := await db["user"].find_one({"_id": id})
+            ) is not None:
+                return update_user
+
+    if (existing_user := await db["user"].find_one({"_id": id})) is not None:
+        return existing_user
+
+    raise HTTPException(status_code=404, detail=f"User {id} not found")
+
+
+@app.post("/GenerateOTP")
+async def Generate_OTP(
+    background_tasks: BackgroundTasks,
+    email: EmailSchema,
+    Auth: str
+):
+    if(Auth == BACKEND_AUTH):
+        message = MessageSchema(
+            subject="Fastapi-Mail module",
+            recipients=email.dict().get("email"),
+            template_body=email.dict().get("body"),
+            subtype=MessageType.html)
+
+        fm = FastMail(conf)
+        background_tasks.add_task(fm.send_message, message,
+                                  template_name='email.html')
+        return JSONResponse(status_code=200, content={"message": "email has been sent"})
+    else:
+        raise HTTPException(status_code=404, detail=f"Auth incorrect")
 
 
 @app.get("/getAllChatClass")
 def getAllChatClassByChatBot():
     response = getAllChatClass()
-    return {"result": True,  "AllChatClass": response}
+    return JSONResponse(status_code=200, content={"result": True,  "AllChatClass": response})
 
 
 @app.get("/SystemInfo")
 async def get_SystemInfo():
-    return GetCPUinfo()
+    return JSONResponse(status_code=200, content=GetCPUinfo())

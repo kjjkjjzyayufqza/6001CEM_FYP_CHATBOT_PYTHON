@@ -21,12 +21,12 @@ def PredictionisHumanPictures(imageByte: bytes):
         r, g, b, a = image.split()
         new_image = Image.merge('RGB', (r, g, b))
         image = new_image
-    transforms = torchvision.transforms.Compose([torchvision.transforms.Resize((64, 64)),
+    transforms = torchvision.transforms.Compose([torchvision.transforms.Resize((224, 224)),
                                                 torchvision.transforms.ToTensor()])
     image = transforms(image)
     model = torch.load(current_path + "best_model_save.pth",
                        map_location=torch.device("cpu"))  # 选择训练后得到的模型文件
-    image = torch.reshape(image, (1, 3, 64, 64))  # 修改待预测图片尺寸，需要与训练时一致
+    image = torch.reshape(image, (1, 3, 224, 224))  # 修改待预测图片尺寸，需要与训练时一致
     model.eval()
     with torch.no_grad():
         output = model(image)

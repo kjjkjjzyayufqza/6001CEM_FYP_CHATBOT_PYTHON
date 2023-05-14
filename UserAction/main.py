@@ -14,6 +14,7 @@ from datetime import datetime, timedelta
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
 from pathlib import Path
 from dotenv import load_dotenv
+from enum import Enum
 load_dotenv('.env')
 
 
@@ -126,6 +127,52 @@ class CreateUserModel(BaseModel):
                 "name": "abc",
                 "email": "abc@a.a",
                 "password": "abc",
+            }
+        }
+
+
+class DoctorCategory(Enum):
+    General_Surgeon = 'General Surgeon'
+    General_Practitioner = 'General Practitioner'
+    Dermatologists = 'Dermatologists'
+    Orthopedic_Surgeon = 'Orthopedic Surgeon'
+    Ophthalmologist = 'Ophthalmologist'
+    Internal_Medicine_Physician = 'Internal Medicine Physician'
+    Otolaryngologist = 'Otolaryngologist'
+    Psychologist = 'Psychologist'
+
+
+class CreateDoctorModel(BaseModel):
+    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
+    name: str
+    email: str
+    mobile: str
+    experience: str
+    certifications: str
+    category: DoctorCategory
+    location: str
+    openingHours: str
+    about: str
+    image: str
+    locationPoint: Dict[str, float]
+
+    class Config:
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}
+        schema_extra = {
+            "example": {
+                "name": "Dr. Lee",
+                "email": "drlee@ca.com",
+                "mobile": "42714456",
+                "experience": "15 years",
+                "certifications": "10",
+                "category": "General Practitioner",
+                "location": "Kowloon Bay",
+                "openingHours": '11:0 AM - 18:00 PM',
+                "about": 'Good Doctor',
+                "image": "https://st.focusedcollection.com/13422768/i/1800/focused_167534016-stock-photo-male-doctor-smiling-looking-camera.jpg",
+                "locationPoint": {"latitude": 22.319764, "longitude": 114.226640},
             }
         }
 

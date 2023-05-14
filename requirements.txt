@@ -16,3 +16,4 @@ passlib==1.7.4
 pymongo==4.3.3
 python-dotenv==1.0.0
 python_jose==3.3.0
+geopy==2.3.0

@@ -132,14 +132,42 @@ class CreateUserModel(BaseModel):
 
 
 class DoctorCategory(Enum):
-    General_Surgeon = 'General Surgeon'
     General_Practitioner = 'General Practitioner'
+    General_Surgeon = 'General Surgeon'
     Dermatologists = 'Dermatologists'
     Orthopedic_Surgeon = 'Orthopedic Surgeon'
     Ophthalmologist = 'Ophthalmologist'
     Internal_Medicine_Physician = 'Internal Medicine Physician'
     Otolaryngologist = 'Otolaryngologist'
     Psychologist = 'Psychologist'
+
+
+class DiseaseList(Enum):
+    infected_wound = 'infected wound'
+    stomach_ache = 'stomach ache'
+    acn = 'acne'
+    joint_pain = 'joint pain'
+    blurry_vision = 'blurry vision'
+    feeling_dizzy = 'feeling dizzy'
+    foot_ache = 'foot ache'
+    head_ache = 'head ache'
+    ear_ache = 'ear ache'
+    hair_falling_out = 'hair falling out'
+    emotional_pain = 'emotional pain'
+    knee_pain = 'knee pain'
+    skin_issue = 'skin issue'
+    muscle_pain = 'muscle pain'
+    feeling_cold = 'feeling cold'
+    back_pain = 'back pain'
+    chest_pain = 'chest pain'
+    shoulder_pain = 'shoulder pain'
+    hard_to_breath = 'hard to breath'
+    cough = 'cough'
+    injury_from_ports = 'injury from sports'
+    neck_pain = 'neck pain'
+    internal_pain = 'internal pain'
+    open_wound = 'open wound'
+    body_feels_weak = 'body feels weak'
 
 
 class CreateDoctorModel(BaseModel):
@@ -173,6 +201,22 @@ class CreateDoctorModel(BaseModel):
                 "about": 'Good Doctor',
                 "image": "https://st.focusedcollection.com/13422768/i/1800/focused_167534016-stock-photo-male-doctor-smiling-looking-camera.jpg",
                 "locationPoint": {"latitude": 22.319764, "longitude": 114.226640},
+            }
+        }
+
+
+class FeedBackModel(BaseModel):
+    category: DiseaseList
+    description: str = Field(...)
+
+    class Config:
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}
+        schema_extra = {
+            "example": {
+                "category": "stomach ache",
+                "description": "hello",
             }
         }
 

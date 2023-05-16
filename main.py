@@ -192,7 +192,7 @@ async def find_doctor(current_user: UserModel = Depends(get_current_user), name:
 
 
 @app.get("/FindClosestDoctor", tags=["doctor"], response_description="Find Doctor", response_model=CreateDoctorModel)
-async def find_closest_doctor(category: str, latitude: str, longitude: str, current_user: UserModel = Depends(get_current_user)):
+async def find_closest_doctor(category: str, latitude: str, longitude: str):
     coords_1 = (latitude, longitude)
     myquery = {"category": {'$regex': '.*' + category + '.*', '$options': 'i'}}
     result = await db["doctor"].find(myquery).to_list(1000)
@@ -211,3 +211,10 @@ async def find_closest_doctor(category: str, latitude: str, longitude: str, curr
         return JSONResponse(status_code=200, content=output)
     else:
         return JSONResponse(status_code=200, content=[])
+
+
+@app.post("/addFeedBack", tags=["feedBack"], response_description="Add FeedBack")
+async def add_FeedBack(feedBack: FeedBackModel = Body(...)):
+    feedBack = jsonable_encoder(feedBack)
+    new_user = await db["feedBack"].insert_one(feedBack)
+    return JSONResponse(status_code=status.HTTP_201_CREATED, content={"result": True})

@@ -208,6 +208,7 @@ class CreateDoctorModel(BaseModel):
 class FeedBackModel(BaseModel):
     category: DiseaseList
     description: str = Field(...)
+    date: datetime = Field(...)
 
     class Config:
         allow_population_by_field_name = True
@@ -217,6 +218,7 @@ class FeedBackModel(BaseModel):
             "example": {
                 "category": "stomach ache",
                 "description": "hello",
+                "date" : datetime.now()
             }
         }
 

@@ -37,15 +37,14 @@ conf = ConnectionConfig(
 )
 
 app = FastAPI()
-client = motor.motor_asyncio.AsyncIOMotorClient(
-    'mongodb+srv://kjjkjj:9CpVfrejfvvOeS4w@cluster.6g4nwkj.mongodb.net/?retryWrites=true&w=majority')
+client = motor.motor_asyncio.AsyncIOMotorClient(os.getenv('MONGODB_URL'))
 db = client.userData
 
 BACKEND_AUTH = 'FYP_BACKEND'
 
 # to get a string like this run:
 # openssl rand -hex 32
-SECRET_KEY = "4421a0e768c7108c49c64bf41d5b6928ef5da2140dea95aaa0ffaa3c4243ed02"
+SECRET_KEY = os.getenv('SECRET_KEY')
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 999999
 
